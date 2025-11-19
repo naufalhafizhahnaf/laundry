@@ -1,0 +1,2 @@
+# .htaccess
+DirectoryIndex login.html index.php index.html
