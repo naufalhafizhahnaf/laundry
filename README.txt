@@ -5,3 +5,87 @@ password = admin123
 USER
 username = user 
 password = user123
+
+
+🔧 Menu Setting di Website Laundry – Isi yang Umum Dipakai
+1. Pengaturan Toko / Profil Laundry
+Biasanya berisi:
+•	Nama laundry
+•	Alamat lengkap
+•	Nomor telepon / WhatsApp
+•	Jam operasional
+•	Logo laundry
+•	Catatan di struk
+•	Nama kasir/admin default di struk
+________________________________________
+2. Harga & Kategori Layanan
+Untuk mengatur layanan:
+•	Laundry Kiloan
+•	Satuan
+•	Express
+•	Antar Jemput
+•	Setrika Saja
+•	Dry Cleaning
+•	Tambahan (parfum, pewangi, hanger, plastik, dll.)
+Serta harga per kategori.
+________________________________________
+3. Pengaturan Pajak & Biaya Tambahan
+Biasanya meliputi:
+•	Pajak (PPN 11%) — jika dipakai
+•	Biaya antar jemput
+•	Biaya packing / plastik
+•	Servis charge
+•	Diskon default
+________________________________________
+4. Pengaturan Queue / Nomor Order
+Agar urutan nota rapi:
+•	Format nomor transaksi
+(contoh: LN-2025-0001)
+•	Reset nomor setiap bulan atau tidak
+•	Penomoran otomatis pelanggan
+________________________________________
+5. Pengaturan Pembayaran
+Jika websitemu punya pembayaran digital, menu ini wajib:
+•	Metode pembayaran aktif (QRIS, Transfer, Cash)
+•	Nama bank
+•	Nomor VA / No Rekening
+•	API key payment gateway (opsional)
+________________________________________
+6. Pengaturan Notifikasi
+Biasanya untuk:
+•	WhatsApp Gateway / API Key WA
+•	Pesan otomatis:
+o	Order diterima
+o	Order selesai
+o	Pengingat order belum diambil
+•	Template pesan (bisa diedit)
+________________________________________
+7. Pengaturan User / Hak Akses
+Untuk mengatur:
+•	Admin
+•	Kasir
+•	Owner
+•	Karyawan
+•	Role / permission (bisa lihat laporan? bisa edit harga?)
+________________________________________
+8. Printer & Struk
+Termasuk:
+•	Font struk
+•	Ukuran kertas (58mm / 80mm)
+•	Auto-print ketika order selesai
+•	Judul struk & footer
+________________________________________
+9. Backup & Maintenance
+Biasanya pemilik ingin:
+•	Backup database
+•	Restore backup
+•	Reset sistem
+•	Import / Export data pelanggan
+________________________________________
+10. Pengaturan Tampilan
+Kalau websitemu modern, biasanya ada:
+•	Mode gelap / terang
+•	Warna tema
+•	Layout dashboard
+•	Logo & banner
+
