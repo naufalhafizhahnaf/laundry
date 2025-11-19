@@ -15,19 +15,27 @@ $query = mysqli_query($connection, "SELECT * FROM account WHERE id='$id'");
 $user = mysqli_fetch_assoc($query);
 
 // Proses form submit
+// Proses form submit
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = mysqli_real_escape_string($connection, $_POST['nama']);
     $username = mysqli_real_escape_string($connection, $_POST['username']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = $_POST['role'];
+$no_hp = mysqli_real_escape_string($connection, $_POST['no_hp'] ?? '');
+
 
     // Cek username sudah ada atau belum
     $check = mysqli_query($connection, "SELECT * FROM account WHERE username='$username'");
     if (mysqli_num_rows($check) > 0) {
         $message = "Username sudah digunakan!";
     } else {
-        $insert = mysqli_query($connection, "INSERT INTO account (nama, username, password, role, created_at) VALUES ('$nama', '$username', '$password', '$role', NOW())");
+        // Insert dengan no_hp dan photo NULL
+        $insert = mysqli_query($connection, "
+            INSERT INTO account (nama, username, password, role, no_hp, photo, created_at)
+            VALUES ('$nama', '$username', '$password', '$role', '$no_hp', NULL, NOW())
+        ");
+
         if ($insert) {
             $message = "User berhasil ditambahkan!";
         } else {
@@ -35,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,6 +139,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <label>Password</label>
       <input type="password" name="password" required>
+      <label>No HP</label>
+<input type="text" name="no_hp">
 
       <label>Role</label>
       <select name="role" required>

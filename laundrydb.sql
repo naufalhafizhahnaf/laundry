@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Nov 19, 2025 at 03:21 AM
+-- Generation Time: Nov 19, 2025 at 03:42 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.26
 
@@ -44,9 +44,8 @@ CREATE TABLE `account` (
 --
 
 INSERT INTO `account` (`id`, `username`, `password`, `nama`, `role`, `alamat`, `no_hp`, `created_at`, `photo`) VALUES
-(1, 'Tiyo', '$2y$10$zba7n5Li2pLxPxDMv3kg2.FxcO0QRTuPa830XlY.M2ZwVffxTJmeS', 'Lubentiyo', 'admin', 'jl.arjuna 2,no 34,bekasi timur', '089620238080', '2025-11-11 20:05:12', '1763518638_Logo Grexs G Ori.jpeg'),
-(2, 'Naufal', '$2y$10$fAFX2hFBxRUdfn7sKs48H.c76s4CjuoV6JMVTe/P6V9bY/87tWbiK', 'Naufal', 'admin', NULL, NULL, '2025-11-12 15:11:49', NULL),
-(4, 'Daffa', '$2y$10$SV0jkoi4JMeEsWh5fxnT5uLw4NP2N2kGds4dFgoEdOfTtFr/VBzsu', 'Daffa', 'user', 'Jl.fufufafa', '08233332111', '2025-11-15 11:57:43', '1763522485_Logo Grexs G Ori.jpeg');
+(5, 'admin', '$2y$10$2qgROfX0U7gDkIxz06pb7e/Pvz60w8L7KgJcX7qZmtRc3DTvilxl.', 'ADMIN', 'admin', '', '', '2025-11-19 10:30:23', NULL),
+(8, 'user', '$2y$10$Duzn0IremS6fTtWDCoxfq.giglet7q2WhNxRIKU2/CQlm4lmh3GzC', 'USER', 'user', 'J1 Kalimalang', '1122334455', '2025-11-19 10:41:13', NULL);
 
 -- --------------------------------------------------------
 
@@ -120,20 +119,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `va_id`, `account_id`, `received_date`, `due_date`, `status`, `service_type`, `weight`, `total_amount`, `payment_status`, `payment_method`, `note`, `created_at`, `updated_at`) VALUES
-(44, 'LDR-2025-0001', '6918091ed744a', 4, '2025-11-15 05:01:18', '2025-11-17 05:01:18', 'done', 'baju', 20.00, 160000.00, 'paid', 'qris', 'Express yaa mass', '2025-11-15 05:01:18', '2025-11-15 05:01:59'),
-(45, 'LDR-2025-0045', '69180b66b1c3a', 4, '2025-11-15 05:11:02', '2025-11-17 05:11:02', 'cancelled', 'baju', 100.00, 800000.00, 'paid', 'qris', 'www', '2025-11-15 05:11:02', '2025-11-15 05:12:21'),
-(46, 'LDR-2025-0046', '69180cb4178c3', 4, '2025-11-15 05:16:35', '2025-11-17 05:16:35', 'pending', 'selimut', 10.00, 100000.00, 'paid', 'qris', 'hhhh', '2025-11-15 05:16:35', '2025-11-15 05:16:47'),
-(47, 'LDR-2025-0047', '69180ee7549d6', 4, '2025-11-15 05:25:59', '2025-11-17 05:25:59', 'pending', 'baju', 20.00, 160000.00, 'unpaid', 'qris', 'wkwkwk', '2025-11-15 05:25:59', '2025-11-15 05:25:59'),
-(48, 'LDR-2025-0048', '69180f5338655', 4, '2025-11-15 05:27:47', '2025-11-17 05:27:47', 'pending', 'baju', 20.00, 160000.00, 'unpaid', 'qris', 'ss', '2025-11-15 05:27:47', '2025-11-15 05:27:47'),
-(49, 'LDR-2025-0049', '69180fab29389', 4, '2025-11-15 05:29:15', '2025-11-17 05:29:15', 'pending', 'baju', 20.00, 160000.00, 'unpaid', 'qris', 'ss', '2025-11-15 05:29:15', '2025-11-15 05:29:15'),
-(50, 'LDR-2025-0050', '69180fbaf06f1', 4, '2025-11-15 05:29:30', '2025-11-17 05:29:30', 'pending', 'baju', 20.00, 160000.00, 'unpaid', 'qris', 'ss', '2025-11-15 05:29:30', '2025-11-15 05:29:30'),
-(51, 'LDR-2025-0051', '691810b5e2552', 4, '2025-11-15 05:33:41', '2025-11-17 05:33:41', 'pending', 'baju', 200.00, 1600000.00, 'unpaid', 'qris', 'ss', '2025-11-15 05:33:41', '2025-11-15 05:33:41'),
-(52, 'LDR-2025-0052', '69181149d17f0', 4, '2025-11-15 05:36:09', '2025-11-17 05:36:09', 'pending', 'baju', 22.00, 176000.00, 'unpaid', 'qris', '', '2025-11-15 05:36:09', '2025-11-15 05:36:09'),
-(53, 'LDR-2025-0053', '691811d57f8f3', 4, '2025-11-15 05:38:29', '2025-11-17 05:38:29', 'pending', 'baju', 20.00, 160000.00, 'unpaid', 'qris', '', '2025-11-15 05:38:29', '2025-11-15 05:38:29'),
-(54, 'LDR-2025-0054', '691812dda4656', 4, '2025-11-15 05:42:53', '2025-11-17 05:42:53', 'pending', 'baju', 30.00, 240000.00, 'paid', 'qris', 'FUFUFAFA', '2025-11-15 05:42:53', '2025-11-15 05:43:07'),
-(55, 'LDR-2025-0055', '691813303eff4', 4, '2025-11-15 05:44:16', '2025-11-17 05:44:16', 'pending', 'baju', 30.00, 240000.00, 'paid', 'qris', 'FUFUFAFA', '2025-11-15 05:44:16', '2025-11-15 05:44:26'),
-(56, 'LDR-2025-0056', '69181a00eeeb7', 4, '2025-11-15 06:13:20', '2025-11-17 06:13:20', 'pending', 'baju', 15.00, 120000.00, 'paid', 'qris', '', '2025-11-15 06:13:20', '2025-11-15 06:14:09'),
-(57, 'LDR-2025-0057', '691aca46baae9', 4, '2025-11-17 07:09:58', '2025-11-19 07:09:58', 'cancelled', 'karpet', 2000.00, 40000000.00, 'paid', 'qris', '', '2025-11-17 07:09:58', '2025-11-17 07:14:21');
+(58, 'LDR-2025-0001', '691d3c6f8f6ea', 8, '2025-11-19 03:41:35', '2025-11-21 03:41:35', 'process', 'baju', 40.00, 320000.00, 'paid', 'qris', '', '2025-11-19 03:41:35', '2025-11-19 03:42:14');
 
 -- --------------------------------------------------------
 
@@ -186,7 +172,7 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT for table `account`
 --
 ALTER TABLE `account`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `admin`
@@ -204,7 +190,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- Constraints for dumped tables

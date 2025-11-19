@@ -50,8 +50,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'register') {
     if (mysqli_num_rows($check) > 0) {
         $message_register = "⚠️ Username sudah digunakan!";
     } else {
-        $query = "INSERT INTO account (username, password, nama, role, alamat, no_hp, created_at)
-                  VALUES ('$username', '$password', '$nama', '$role', '$alamat', '$no_hp', NOW())";
+        $query = "INSERT INTO account (username, password, nama, role, alamat, no_hp,photo, created_at)
+                  VALUES ('$username', '$password', '$nama', '$role', '$alamat', '$no_hp',null, NOW())";
         if (mysqli_query($connection, $query)) {
             $message_register = "✅ Akun berhasil dibuat! Silakan login.";
         } else {

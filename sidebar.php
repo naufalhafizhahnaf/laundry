@@ -80,13 +80,13 @@ if ($id) {
     </div>
 
     <!-- Bawah -->
-    <div class="logout">
+<div class="logout">
 <a href="../profile/profile.php" class="menu-item photo" title="photo">
-  <?php if (!empty($user['photo']) && $user['photo'] !== "default"): ?>
-        <img src="/uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
-  <?php else: ?>
-        <i class="fa-solid fa-circle-user photo-icon-default"></i>
-  <?php endif; ?>
+<?php if ($user['photo'] !== null && $user['photo'] !== ""): ?>
+      <img src="/uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
+<?php else: ?>
+      <i class="fa-solid fa-circle-user photo-icon-default"></i>
+<?php endif; ?>
   <span>Profile</span>
 </a>
 
