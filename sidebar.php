@@ -24,12 +24,10 @@ if ($id) {
 }
 ?>
 
+
 <body class="role-<?= htmlspecialchars($role) ?>">
-
-<!-- WRAPPER UNTUK ANTI KEDUT -->
-<div class="sidebar-wrapper">
   <div class="sidebar">
-
+    <!-- Logo -->
     <div class="logo">
       <a href="../dashboard/index.php"
         class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'tiket_umrah') !== false ? 'active' : '' ?>"
@@ -38,31 +36,30 @@ if ($id) {
       </a>
     </div>
 
+    <!-- Menu utama -->
     <div class="menu">
 
       <?php if ($role === 'admin') : ?>
         <a href="../Statistik/index.php"
-          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'statistic') !== false ? 'active' : '' ?>"
-          title="Statistic">
+          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 
+          'statistic') !== false ? 'active' : '' ?>" title="Statistic">
           <i class="fa-solid fa-chart-simple"></i>
           <span>Statistic</span>
         </a>
-
         <a href="../users/index.php"
-          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'users') !== false ? 'active' : '' ?>"
-          title="User Management">
+          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'],
+          'users') !== false ? 'active' : '' ?>" title="User Management">
           <i class="fa-solid fa-users"></i>
           <span>User Management</span>
         </a>
 
         <a href="../list_order/index.php"
-          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'List_order') !== false ? 'active' : '' ?>"
-          title="List Order">
+          class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 
+          'List_order') !== false ? 'active' : '' ?>" title="List Order">
           <i class="fa-solid fa-layer-group"></i>
           <span>List Order</span>
         </a>
       <?php endif; ?>
-
       <?php if ($role === 'user') : ?>
       <a href="../home/index.php"
         class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'tiket_umrah') !== false ? 'active' : '' ?>"
@@ -79,132 +76,159 @@ if ($id) {
       </a>
       <?php endif; ?>
 
+
     </div>
 
-    <!-- BAWAH -->
-    <div class="logout">
-      <a href="../profile/profile.php" class="menu-item photo" title="photo">
-        <?php if ($user && $user['photo']) : ?>
-          <img src="../uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
-        <?php else: ?>
-          <i class="fa-solid fa-circle-user profile-icon-default"></i>
-        <?php endif; ?>
-        <span>Profile</span>
-      </a>
+    <!-- Bawah -->
+<div class="logout">
+<a href="../profile/profile.php" class="menu-item photo" title="photo">
+<?php if ($user['photo'] !== null && $user['photo'] !== ""): ?>
+      <img src="../uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
+<?php else: ?>
+      <i class="fa-solid fa-circle-user photo-icon-default"></i>
+<?php endif; ?>
+  <span>Profile</span>
 
       <a href="../login.php" class="menu-item" title="Logout">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
       </a>
     </div>
-
   </div>
-</div>
-
 </body>
 
 <style>
-/* Profile image */
 .profile-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
 }
 
 .profile-icon-default {
-  font-size: 26px;
-  color: #ccc;
-  margin-right: 8px;
+    font-size: 26px;
+    color: #ccc;
+    margin-right: 8px;
 }
 
-/* ----- WRAPPER ANTI KEDUT ----- */
-.sidebar-wrapper {
-  width: 70px;
-  transition: width .35s ease;
-  height: 100vh;
-}
 
-.role-admin .sidebar-wrapper:hover {
-  width: 230px;
-}
+  .sidebar {
+    width: 70px;
+    height: 100vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* isi sidebar tetap di kiri */
+    padding: 20px 10px;
+    transition: all 0.4s ease;
+    overflow: hidden;
+    /* biar gak melebarin konten ke luar */
+  }
 
-.role-user .sidebar-wrapper:hover {
-  width: 200px;
-}
+  .logo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+  }
 
-/* SIDEBAR */
-.sidebar {
-  width: 100%;
-  height: 100vh;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 10px;
-  overflow: hidden;
-  transition: all .35s ease;
-}
+  .logo .menu-item {
+    color: #007bff;
+  }
 
-/* Menu */
-.menu,
-.logo {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-}
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    /* item tetap nempel kiri */
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 
-.menu {
-  margin-top: auto;
-  margin-bottom: auto;
-}
+  .menu-item {
+    color: #2c79ff;
+    font-size: 22px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    /* ikon & teks sejajar vertikal */
+    justify-content: flex-start;
+    /* biar konten mulai dari kiri */
+    gap: 12px;
+    /* jarak antara ikon dan teks */
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    width: 100%;
+    /* biar teks bisa rata */
+    box-sizing: border-box;
+  }
 
-/* Items */
-.menu-item {
-  color: #2c79ff;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 12px;
-  transition: .25s;
-}
+  .menu-item:hover {
+    color: #007bff;
+    border: 2px solid #007bff;
+    transform: scale(1.05);
+  }
 
-.menu-item:hover {
-  color: #007bff;
-  border: 2px solid #007bff;
-  transform: scale(1.04);
-}
+  /* Sidebar melebar pas salah satu menu di-hover */
+  /* Untuk admin */
+  .role-admin .sidebar:hover {
+    width: 230px;
+    transform: translateX(5px);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  }
 
-/* ICON SPACING */
-.menu-item i {
-  min-width: 25px;
-  text-align: center;
-}
+  /* Untuk user biasa */
+  .role-user .sidebar:hover {
+    width: 200px;
+    transform: translateX(3px);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  }
 
-/* LABEL */
+  .menu-item i {
+    min-width: 25px;
+    /* biar semua ikon punya lebar konsisten */
+    text-align: center;
+  }
+
+/* Label selalu kelihatan */
 .menu-item span {
-  font-size: 15px;
-  opacity: 0;
-  transition: opacity .3s ease;
-  white-space: nowrap;
+    font-size: 15px;
+    opacity: 0;
+    visibility: visible;
+    transition: opacity 0.3s ease;
 }
 
-/* Tampil saat hover */
-.sidebar-wrapper:hover .menu-item span,
+/* Sidebar hover — tidak perlu lagi menyalakan span */
+.sidebar:has(.menu-item:hover) .menu-item span {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Item aktif — tetap kelihatan */
 .menu-item.active span {
-  opacity: 1;
+    opacity: 1;
+    visibility: visible;
 }
 
-/* Logout section */
-.logout {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
+
+  .logout {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: auto;
+  }
+
+  .logout .menu-item {
+    color: #007bff;
+  }
+
+  .menu-item.photo {
+    color: #007bff;
+  }
 </style>
