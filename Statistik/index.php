@@ -74,32 +74,56 @@ h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
 
 /* TOP SECTION */
 .top-stats {
-    display:flex;
-    gap:20px;
-    margin-bottom:25px;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
     flex-wrap: wrap;
+    align-items: stretch;
 }
 
 .chart-box {
-    flex:1;
-    min-width:300px;
-    height:200px;
-    background:white;
-    padding:15px;
-    border-radius:15px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    flex: 1;
+    min-width: 300px;
+    height: 200px;
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* ✅ FULL CENTER FIX */
 .income-card {
-    width:260px;
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    width: 260px;
+    height: 200px; /* disamakan dengan chart-box */
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* tengah atas-bawah */
+    align-items: center;     /* tengah kanan-kiri */
+    text-align: center;
 }
-.income-card h3 { color:#007bff; font-size:16px; }
-.income-card p { font-size:28px; font-weight:600; margin-top:5px; }
+
+.income-card h3 { 
+    color: #007bff; 
+    font-size: 16px; 
+}
+
+.income-card p { 
+    font-size: 28px; 
+    font-weight: 600; 
+    margin-top: 5px; 
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .income-card {
+        width: 100%;
+    }
+}
 
 /* FILTER */
 .filter-card {
