@@ -1,0 +1,5 @@
+Q&A
+ada kotak biru di bagian detail product list, terus bagian detail mau di buat table (admin)
+detail di order statistic dari - hingga (admin)
+sidebar kedat-kedut 
+ubah UI di table order list (admin)
