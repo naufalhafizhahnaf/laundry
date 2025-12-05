@@ -83,20 +83,11 @@ if ($id) {
 <div class="logout">
 <a href="../profile/profile.php" class="menu-item photo" title="photo">
 <?php if ($user['photo'] !== null && $user['photo'] !== ""): ?>
-      <img src="/uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
+      <img src="../uploads/profile/<?= $user['photo']; ?>" class="profile-icon">
 <?php else: ?>
       <i class="fa-solid fa-circle-user photo-icon-default"></i>
 <?php endif; ?>
   <span>Profile</span>
-</a>
-
-
-      <a href="../settings/index.php"
-        class="menu-item <?= $current == 'index.php' && strpos($_SERVER['PHP_SELF'], 'hotel_mekkah') !== false ? 'active' : '' ?>"
-        title="Setting">
-        <i class="fa-solid fa-cog"></i>
-        <span>Setting</span>
-      </a>
 
       <a href="../login.php" class="menu-item" title="Logout">
         <i class="fa-solid fa-right-from-bracket"></i>

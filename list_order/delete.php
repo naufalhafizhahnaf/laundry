@@ -1,26 +1,40 @@
 <?php
-require_once "../../connection.php";
-
-// Cek apakah admin login
+require_once "../connection.php";
 session_start();
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../../login.php");
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
     exit;
 }
 
-// Ambil ID user dari query string
 if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $delete = mysqli_query($connection, "DELETE FROM admin WHERE id=$id");
 
-    if ($delete) {
-        // Bisa redirect ke daftar user dengan pesan sukses
-        header("Location: index.php?message=User+berhasil+dihapus");
-        exit;
+    $id = intval($_GET['id']);
+    $account_id = $_SESSION['user_id'];
+
+    // ✅ FIX: pakai account_id (bukan user_id)
+    $query = "DELETE FROM orders WHERE id = ? AND account_id = ?";
+    $stmt = mysqli_prepare($connection, $query);
+
+    mysqli_stmt_bind_param($stmt, "ii", $id, $account_id);
+    $execute = mysqli_stmt_execute($stmt);
+
+    if ($execute) {
+        $_SESSION['info'] = [
+            'status' => 'success',
+            'message' => 'Order berhasil dihapus'
+        ];
     } else {
-        header("Location: index.php?message=Gagal+menghapus+user");
-        exit;
+        $_SESSION['info'] = [
+            'status' => 'error',
+            'message' => 'Gagal menghapus order'
+        ];
     }
+
+    mysqli_stmt_close($stmt);
+    header("Location: index.php");
+    exit;
+
 } else {
     header("Location: index.php");
     exit;
