@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Nov 19, 2025 at 03:42 AM
+-- Generation Time: Nov 20, 2025 at 02:12 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.26
 
@@ -29,15 +29,15 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `account` (
   `id` int NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `nama` varchar(100) NOT NULL,
-  `role` enum('admin','staff','user','customer') NOT NULL DEFAULT 'customer',
-  `alamat` varchar(255) DEFAULT NULL,
-  `no_hp` varchar(20) DEFAULT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `role` enum('admin','staff','user','customer') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'customer',
+  `alamat` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `no_hp` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `photo` varchar(255) DEFAULT 'default.png'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `photo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT 'default.png'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `account`
@@ -55,12 +55,12 @@ INSERT INTO `account` (`id`, `username`, `password`, `nama`, `role`, `alamat`, `
 
 CREATE TABLE `admin` (
   `id` int NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `nama` varchar(100) DEFAULT NULL,
-  `role` varchar(20) DEFAULT 'admin',
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `role` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'admin',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `admin`
@@ -81,14 +81,14 @@ INSERT INTO `admin` (`id`, `username`, `password`, `nama`, `role`, `created_at`)
 
 CREATE TABLE `customer` (
   `id` int NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `nama` varchar(100) DEFAULT NULL,
-  `alamat` varchar(255) DEFAULT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `alamat` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tanggal_lahir` date DEFAULT NULL,
-  `no_hp` varchar(20) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
+  `no_hp` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -98,21 +98,21 @@ CREATE TABLE `customer` (
 
 CREATE TABLE `orders` (
   `id` int NOT NULL,
-  `order_code` varchar(50) NOT NULL,
-  `va_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `order_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `va_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `account_id` int NOT NULL,
   `received_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `due_date` datetime DEFAULT NULL,
-  `status` enum('pending','process','done','taken','cancelled') DEFAULT 'pending',
-  `service_type` varchar(50) DEFAULT NULL,
+  `status` enum('pending','process','done','taken','cancelled') COLLATE utf8mb4_general_ci DEFAULT 'pending',
+  `service_type` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `weight` decimal(6,2) DEFAULT '0.00',
   `total_amount` decimal(12,2) DEFAULT '0.00',
-  `payment_status` enum('unpaid','paid') DEFAULT 'unpaid',
-  `payment_method` enum('cash','transfer','qris') DEFAULT 'cash',
-  `note` text,
+  `payment_status` enum('unpaid','paid') COLLATE utf8mb4_general_ci DEFAULT 'unpaid',
+  `payment_method` enum('cash','transfer','qris') COLLATE utf8mb4_general_ci DEFAULT 'cash',
+  `note` mediumtext COLLATE utf8mb4_general_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
@@ -129,7 +129,7 @@ INSERT INTO `orders` (`id`, `order_code`, `va_id`, `account_id`, `received_date`
 
 CREATE TABLE `ss` (
   `id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables

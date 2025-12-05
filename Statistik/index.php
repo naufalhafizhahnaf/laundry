@@ -72,16 +72,18 @@ body { display:flex; background:#f5f7ff; }
 .main { flex:1; padding:30px 40px; overflow-y:auto; }
 h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
 
-/* CHART + INCOME SECTION */
+/* TOP SECTION */
 .top-stats {
     display:flex;
     gap:20px;
     margin-bottom:25px;
+    flex-wrap: wrap;
 }
 
 .chart-box {
-    width:1000px;
-    height:150px;
+    flex:1;
+    min-width:300px;
+    height:200px;
     background:white;
     padding:15px;
     border-radius:15px;
@@ -89,7 +91,7 @@ h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
 }
 
 .income-card {
-    width:230px;
+    width:260px;
     background:white;
     padding:20px;
     border-radius:15px;
@@ -101,8 +103,9 @@ h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
 
 /* FILTER */
 .filter-card {
-    width:1250px;
+    width:100%;
     display:flex;
+    flex-wrap:wrap;
     gap:10px;
     padding:15px;
     background:white;
@@ -115,14 +118,16 @@ h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
     padding:10px;
     border-radius:10px;
     border:1px solid #ccc;
+    flex:1;
+    min-width:150px;
 }
 
 .filter-search {
-    width:1000px; /* 🔥 Search tidak terlalu panjang */
+    flex:2;
 }
 
 .filter-card button {
-    padding:10px 18px;
+    padding:10px;
     border:none;
     background:#0066ff;
     color:white;
@@ -138,6 +143,7 @@ h1 { font-size:24px; font-weight:600; margin-bottom:25px; color:#222; }
     border-radius:15px;
     box-shadow:0 4px 12px rgba(0,0,0,0.05);
     margin-bottom:20px;
+    overflow-x:auto;
 }
 
 table { width:100%; border-collapse:collapse; }
@@ -146,6 +152,76 @@ th { background:#eef4ff; color:#007bff; font-weight:600; }
 
 .paid { color:green; font-weight:600; }
 .unpaid { color:red; font-weight:600; }
+
+/* ================= MOBILE RESPONSIVE ================= */
+@media (max-width: 768px){
+
+    body{
+        flex-direction: column;
+    }
+
+    .main{
+        padding:20px 15px;
+    }
+
+    h1{
+        font-size:20px;
+    }
+
+    .top-stats{
+        flex-direction: column;
+    }
+
+    .chart-box{
+        width:100%;
+        height:220px;
+    }
+
+    .income-card{
+        width:100%;
+    }
+
+    .filter-card{
+        flex-direction: column;
+    }
+
+    .filter-card input,
+    .filter-card button{
+        width:100%;
+    }
+
+    /* RESPONSIVE TABLE -> CARD STYLE */
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+
+    thead {
+        display:none;
+    }
+
+    table tr {
+        margin-bottom: 15px;
+        background:white;
+        padding:12px;
+        border-radius:12px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    table td {
+        border: none;
+        font-size: 14px;
+        padding:6px 0;
+    }
+
+    table td::before {
+        content: attr(data-label);
+        font-weight:600;
+        color:#007bff;
+        margin-bottom:3px;
+        display:block;
+    }
+}
 </style>
 </head>
 
@@ -154,7 +230,7 @@ th { background:#eef4ff; color:#007bff; font-weight:600; }
 <div class="main">
     <h1>Order Statistics</h1>
 
-    <!-- ==================== TOP SECTION ===================== -->
+    <!-- TOP SECTION -->
     <div class="top-stats">
         <div class="chart-box">
             <canvas id="incomeChart"></canvas>
@@ -166,7 +242,7 @@ th { background:#eef4ff; color:#007bff; font-weight:600; }
         </div>
     </div>
 
-    <!-- ==================== FILTER BOX ===================== -->
+    <!-- FILTER -->
     <form class="filter-card" method="GET">
         <input type="date" name="from" value="<?= $from ?>">
         <input type="date" name="to" value="<?= $to ?>">
@@ -174,32 +250,36 @@ th { background:#eef4ff; color:#007bff; font-weight:600; }
         <button type="submit">Filter</button>
     </form>
 
-    <!-- ==================== TABLE ===================== -->
+    <!-- TABLE -->
     <div class="card">
         <h3 style="color:#007bff; margin-bottom:15px;">Order List</h3>
-
         <table>
-            <tr>
-                <th>Order Code</th>
-                <th>Date</th>
-                <th>Service</th>
-                <th>Weight</th>
-                <th>Amount</th>
-                <th>Payment</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Date</th>
+                    <th>Service</th>
+                    <th>Weight</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
 
+            <tbody>
             <?php while($o = mysqli_fetch_assoc($orders)): ?>
             <tr>
-                <td><?= $o['order_code'] ?></td>
-                <td><?= $o['created_at'] ?></td>
-                <td><?= $o['service_type'] ?></td>
-                <td><?= $o['weight'] ?> Kg</td>
-                <td>Rp <?= number_format($o['total_amount'],0,',','.') ?></td>
-                <td class="<?= $o['payment_status']=='paid'?'paid':'unpaid' ?>">
+                <td data-label="Order Code"><?= $o['order_code'] ?></td>
+                <td data-label="Date"><?= $o['created_at'] ?></td>
+                <td data-label="Service"><?= $o['service_type'] ?></td>
+                <td data-label="Weight"><?= $o['weight'] ?> Kg</td>
+                <td data-label="Amount">Rp <?= number_format($o['total_amount'],0,',','.') ?></td>
+                <td data-label="Payment" class="<?= $o['payment_status']=='paid'?'paid':'unpaid' ?>">
                     <?= ucfirst($o['payment_status']) ?>
                 </td>
             </tr>
             <?php endwhile; ?>
+            </tbody>
+
         </table>
     </div>
 
@@ -223,8 +303,8 @@ new Chart(ctx, {
     options: {
         plugins: { legend: { display:false }},
         scales: {
-            x: { display:true, ticks:{ font:{ size:10 }}},
-            y: { display:true, ticks:{ font:{ size:10 }}}
+            x: { ticks:{ font:{ size:10 }}},
+            y: { ticks:{ font:{ size:10 }}}
         },
         responsive: true,
         maintainAspectRatio: false
