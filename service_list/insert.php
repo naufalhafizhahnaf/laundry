@@ -1,499 +1,387 @@
 <?php
-require_once "../connection.php";
+require_once "../../connection.php";
 session_start();
 include "../sidebar.php";
 
+// ✅ Cek login
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit;
 }
 
+// ✅ Ambil data user
 $id = $_SESSION['user_id'];
-$query = mysqli_query($connection, "SELECT * FROM account WHERE id = '$id'");
+$query = mysqli_query($connection, "SELECT * FROM account WHERE id='$id'");
 $user = mysqli_fetch_assoc($query);
 
-// Ambil parameter dari URL
-$service = isset($_GET['service']) ? htmlspecialchars($_GET['service']) : '';
-$price = isset($_GET['price']) ? floatval($_GET['price']) : 0;
-$type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : '';
-
-// Fungsi generate order code
-function generateOrderCode($connection)
-{
-    $year = date('Y');
-    $result = mysqli_query($connection, "SELECT MAX(id) AS last_id FROM orders");
-    $data = mysqli_fetch_assoc($result);
-    $next_id = ($data['last_id'] ?? 0) + 1;
-    return sprintf("LDR-%s-%04d", $year, $next_id);
-}
-
-$message = '';
-$success = false;
-$payment_link = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $account_id = $_SESSION['user_id'];
-    $service_type = mysqli_real_escape_string($connection, $_POST['service_type']);
-    $weight = floatval($_POST['weight']);
-    $price_per_kg = floatval($_POST['price']);
-    $total_amount = $weight * $price_per_kg;
-    $payment_method = mysqli_real_escape_string($connection, $_POST['payment_method']);
-    $note = mysqli_real_escape_string($connection, $_POST['note']);
-
-    $order_code = generateOrderCode($connection);
-    $received_date = date('Y-m-d H:i:s');
-    $due_date = date('Y-m-d H:i:s', strtotime('+2 days'));
-    $status = 'pending';
-    $payment_status = 'unpaid';
-
-    $query = "
-        INSERT INTO orders 
-        (order_code, account_id, received_date, due_date, status, service_type, weight, total_amount, payment_status, payment_method, note, created_at, updated_at)
-        VALUES 
-        ('$order_code', '$account_id', '$received_date', '$due_date', '$status', '$service_type', '$weight', '$total_amount', '$payment_status', '$payment_method', '$note', NOW(), NOW())
-    ";
-
-    $insert = mysqli_query($connection, $query);
-
-    if ($insert) {
-        $success = true;
-        $message = "Order berhasil dibuat dengan kode: $order_code";
-        $order_id = mysqli_insert_id($connection);
-
-        // Jika QRIS atau Transfer → generate VA
-        if (in_array($payment_method, ['qris', 'transfer'])) {
-            $paymentDir = __DIR__ . '/../payment';
-            $file = $paymentDir . '/data.json';
-
-            if (!is_dir($paymentDir)) {
-                mkdir($paymentDir, 0777, true);
-            }
-
-            if (!file_exists($file)) {
-                file_put_contents($file, '{}');
-            }
-
-            $data = json_decode(file_get_contents($file), true) ?: [];
-
-            // Generate VA
-            $va_id = uniqid();
-            $va_number = 'VA-' . strtoupper(substr(md5($va_id), 0, 6));
-
-            $data[$va_id] = [
-                'order_id' => $order_id,
-                'va' => $va_number,
-                'amount' => $total_amount,
-                'status' => 'pending',
-                'created_at' => time()
-            ];
-
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
-
-            // SIMPAN VA_ID KE DATABASE
-            $va_safe = mysqli_real_escape_string($connection, $va_id);
-            mysqli_query($connection, "UPDATE orders SET va_id='$va_safe' WHERE id=$order_id LIMIT 1");
-
-            // Link pembayaran
-            $base = ($_SERVER['REQUEST_SCHEME'] ?? 'http') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
-            $payment_link = "$base/../payment/pay.php?id=$va_id&order=$order_id";
-        }
-
-// 🔥 SWEETALERT LOADING — PREMIUM FULL OVERRIDE
-if ($payment_link) {
-    echo "
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-    <script>
-        
-        Swal.fire({
-            title: '<div class=\"swal-title-custom\">Sedang Memproses Pesanan...</div>',
-            html: `
-                <div class=\"swal-subtext-custom\">
-                    Mohon tunggu sebentar ya 😊<br>
-                    Sistem sedang menyiapkan halaman pembayaran.
-                </div>
-                <div class=\"loader-premium\"></div>
-            `,
-            background: '#f1f2f4 !important',
-            width: '360px',
-            padding: '30px 20px',
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClass: {
-                popup: 'popup-premium'
-            }
-        });
-
-        // Inject custom CSS FULL OVERRIDE
-        const style = document.createElement('style');
-style.innerHTML = `
-    .popup-premium {
-        background: rgba(255,255,255,0.65) !important;
-        backdrop-filter: blur(14px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
-        border-radius: 22px !important;
-        border: 1px solid rgba(255,255,255,0.35) !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
-        animation: fadeSlide 0.35s ease !important;
-        padding: 28px 24px !important;
-    }
-
-    .swal-title-custom {
-        font-size: 21px;
-        font-weight: 800;
-        color: #1f2937;
-        margin-bottom: 8px;
-        letter-spacing: -0.3px;
-    }
-
-    .swal-subtext-custom {
-        font-size: 14px;
-        color: #4b5563;
-        margin-bottom: 20px;
-        line-height: 1.55;
-    }
-
-    /* New Premium Loader — iOS Style */
-    .loader-premium {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        margin: 0 auto;
-        border: 4px solid rgba(0,0,0,0.08);
-        border-top-color: #2563eb;
-        animation: spin 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-    }
-
-    @keyframes spin {
-        0%   { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeSlide {
-        0% { opacity: 0; transform: translateY(14px) scale(0.97); }
-        100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* MOBILE DESIGN — Ultra Clean */
-@media (max-width: 480px) {
-    .popup-premium {
-        width: 96% !important;        /* hampir full width */
-        padding: 34px 26px !important; /* diperbesar */
-        border-radius: 22px !important;
-        transform: scale(1.04);        /* sedikit membesar */
-    }
-    .swal-title-custom {
-        font-size: 21px !important;
-    }
-    .swal-subtext-custom {
-        font-size: 14.5px !important;
-        margin-bottom: 22px !important;
-    }
-    .loader-premium {
-        width: 52px;
-        height: 52px;
-        border-width: 5px;            /* loader lebih bold */
-    }
-}
-
-`;
-
-        document.head.appendChild(style);
-
-        setTimeout(() => {
-            window.location.href = '$payment_link';
-        }, 3500);
-    </script>";
-    exit;
-}
-
-
-
-    } else {
-        $message = 'Terjadi kesalahan query: ' . mysqli_error($connection);
-    }
-}
+// ✅ Ambil semua order user (FULL FIX)
+$order_query = mysqli_query($connection, "
+    SELECT 
+    id,
+        order_code,
+        service_type,
+        weight,
+        total_amount,
+        status,
+        payment_status,
+        received_date,
+        due_date,
+        va_id,
+        created_at
+    FROM orders 
+    WHERE account_id='$id'
+    ORDER BY created_at DESC
+");
 ?>
-
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buat Order Laundry</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>Service List - Laundryin</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
-}
 
-body {
-    display: flex;
-    min-height: 100vh;
-    background: #f5f7ff;
-}
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;}
+    body {display:flex;background:#f5f7ff;min-height:100vh;color:#333;}
+    .main {flex:1;padding:40px;overflow-y:auto;}
 
-/* MAIN WRAPPER */
-.main {
-    flex: 1;
-    padding: 40px;
-    display: flex;
-    justify-content: center;
-}
+    .top-bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}
+    .top-bar h1 {font-size:28px;font-weight:700;color:#007bff;}
+    .user-info span {font-size:16px;color:#555;}
 
-.main-inner {
-    width: 100%;
-    max-width: 850px;
-}
-
-/* PAGE TITLE */
-h1 {
-    color: #007bff;
-    font-weight: 700;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 28px;
-}
-
-/* FORM CONTAINER */
-form {
-    background: #fff;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-/* GRID INPUT */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-label {
-    font-weight: 500;
-    margin-bottom: 5px;
-    display: block;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #dce1f0;
-    border-radius: 10px;
-    font-size: 15px;
-    margin-bottom: 8px;
-    transition: 0.2s;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 3px rgba(0,123,255,0.3);
-}
-
-input[readonly] {
-    background: #f3f4f8;
-    color: #666;
-}
-
-/* FULL WIDTH */
-.full {
-    grid-column: span 2;
-}
-
-/* BUTTON */
-button {
-    margin-top: 20px;
-    padding: 14px 25px;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #005ecb;
-}
-
-/* SUCCESS / ERROR BOX */
-.message {
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.message.success {
-    background: #d4f4dd;
-    color: #207a36;
-}
-
-.message.error {
-    background: #fce4e4;
-    color: #8a1f1f;
-}
-
-/* RESPONSIVE — MOBILE */
-@media (max-width: 900px) {
-    .main {
-        padding: 25px;
+    /* Service Grid */
+    .service-container {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:20px;
+      margin-bottom:40px;
     }
+    .service-card {
+      background:white;border-radius:15px;padding:25px 20px;text-align:center;
+      box-shadow:0 4px 12px rgba(0,0,0,0.05);
+      transition:0.3s;cursor:pointer;border:2px solid transparent;
+    }
+    .service-card:hover {transform:translateY(-5px);border-color:#007bff;box-shadow:0 6px 18px rgba(0,0,0,0.1);}
+    .service-card i {font-size:40px;color:#007bff;margin-bottom:15px;}
+    .service-card h4 {font-size:18px;margin-bottom:8px;color:#333;}
+    .service-card p {font-size:13px;color:#777;}
+    .price {
+      display:inline-block;margin-top:10px;padding:6px 12px;
+      background:#eaf4ff;color:#007bff;font-weight:600;border-radius:12px;font-size:13px;
+    }
+
+    /* Table */
+    .order-section h2 {
+      font-size:22px;
+      font-weight:600;
+      color:#333;
+      margin-bottom:15px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding:12px 15px;
+      text-align:left;
+      border-bottom:1px solid #f0f0f0;
+    }
+    th {
+      background:#007bff;
+      color:white;
+      font-weight:600;
+      font-size:14px;
+    }
+    tr:hover {background:#f8faff;}
+
+/* ===== STATUS BADGES (SAMA DENGAN LIST_ORDER) ===== */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
 }
 
+/* Pending (Kuning) */
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* On Process (Biru) */
+.status-badge.process {
+    background: #cce5ff;
+    color: #004085;
+}
+
+/* Selesai (Hijau) */
+.status-badge.done {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* Dibatalkan (Merah) */
+.status-badge.cancel {
+    background: #f8d7da;
+    color: #721c24;
+}
+    .completed {background:#d4edda;color:#155724;}
+    .unpaid {background:#f8d7da;color:#721c24;}
+    .paid {background:#d1ecf1;color:#0c5460;}
+
+    .clickable-badge:hover {
+      opacity:0.75;
+      cursor:pointer;
+    }
+    /* ============================= */
+/* RESPONSIVE TABLE (MOBILE)     */
+/* ============================= */
 @media (max-width: 768px) {
 
-    .main {
-        padding: 20px;
-    }
+  table thead {
+    display: none; /* Hilangkan header */
+  }
 
-    h1 {
-        font-size: 22px;
-        margin-bottom: 10px;
-    }
+  table, table tbody, table tr, table td {
+    display: block;
+    width: 100%;
+  }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 0px;
-    }
+  table tr {
+    margin-bottom: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  }
 
-    .full {
-        grid-column: span 1;
-    }
+  table td {
+    border: none;
+    padding: 5px 0;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+  }
 
-    form {
-        padding: 20px;
-    }
+  /* Label kiri */
+  table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+  }
 
-    input, select, textarea {
-        padding: 11px;
-        font-size: 14px;
-    }
+  /* Kolom yang disembunyikan di mobile */
+  td[data-hide="mobile"] {
+    display: none;
+  }
 
-    button {
-        width: 100%;
-        margin-top: 10px;
-    }
+
+
+  
+  .service-container {
+    grid-template-columns: repeat(2, 1fr); /* jadi 2 kolom */
+    gap: 12px;
+  }
+
+  .service-card {
+    padding: 15px 10px;
+    border-radius: 12px;
+  }
+
+  .service-card i {
+    font-size: 28px; /* icon diperkecil */
+    margin-bottom: 10px;
+  }
+
+  .service-card h4 {
+    font-size: 15px; /* judul kecil */
+    margin-bottom: 5px;
+  }
+
+  .service-card p {
+    font-size: 11px; /* deskripsi kecil */
+  }
+
+  .price {
+    font-size: 11px;
+    padding: 4px 8px;
+    margin-top: 8px;
+  }
+
 }
 
-/* EXTRA MOBILE < 480px */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 19px;
-    }
-
-    input, select, textarea {
-        padding: 10px;
-    }
-}
-
-</style>
+  </style>
 </head>
+
 <body>
-  <div class="main">
-        <div class="main-inner">
-    <h1><i class="fa-solid fa-basket-shopping"></i> Buat Order Laundry</h1>
 
-    <?php if($message): ?>
-      <div class="message <?= $success ? 'success' : 'error' ?>">
-        <?= htmlspecialchars($message); ?>
-        <?php if($payment_link): ?>
-          <br><br>
-          <a href="<?= $payment_link ?>" target="_blank">
-            <button style="background:#28a745;">💳 Bayar Sekarang</button>
-          </a>
-          <br><br>
-          <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=<?= urlencode($payment_link) ?>" alt="QR">
-        <?php endif; ?>
-      </div>
-    <?php endif; ?>
+<div class="main">
 
-<form method="POST" action="">
-    
-    <div class="form-grid">
-
-        <!-- ROW 1 -->
-        <div>
-            <label>Nama Customer</label>
-            <input type="text" value="<?= htmlspecialchars($user['nama']); ?>" readonly>
-        </div>
-
-        <div>
-            <label>Service</label>
-            <input type="text" name="service_type" value="<?= htmlspecialchars($service ?: 'tidak diketahui'); ?>" readonly>
-        </div>
-
-        <!-- ROW 2 -->
-        <?php if($type): ?>
-        <div>
-            <label>Tipe Laundry</label>
-            <input type="text" value="<?= htmlspecialchars($type); ?>" readonly>
-        </div>
-        <?php else: ?>
-        <div></div>
-        <?php endif; ?>
-
-        <div>
-            <label>Harga per Kg (Rp)</label>
-            <input type="number" name="price" id="price" value="<?= $price; ?>" readonly>
-        </div>
-
-        <!-- ROW 3 -->
-        <div>
-            <label>Berat Cucian (Kg)</label>
-            <input type="number" step="0.1" name="weight" id="weight" min="0.1" required>
-        </div>
-
-        <div>
-            <label>Total Harga (Rp)</label>
-            <input type="number" name="total_amount" id="total_amount" readonly>
-        </div>
-
-        <!-- ROW 4 -->
-        <div>
-            <label>Metode Pembayaran</label>
-            <select name="payment_method" required>
-                <option value="">-- Pilih Metode --</option>
-                <option value="cash">Cash</option>
-                <option value="qris">QRIS</option>
-                <option value="transfer">Transfer</option>
-            </select>
-        </div>
-
-        <div></div>
-
-        <!-- ROW 5 (FULL WIDTH) -->
-        <div class="full">
-            <label>Catatan</label>
-            <textarea name="note" rows="3" placeholder="Tulis catatan tambahan (opsional)..."></textarea>
-        </div>
-
+  <div class="top-bar">
+    <h1>Choose Your Laundry Service</h1>
+    <div class="user-info">
+      <span>👋 Hi, <?= htmlspecialchars($user['nama']); ?></span>
     </div>
-
-    <button type="submit">
-        <i class="fa-solid fa-check"></i> Buat Order
-    </button>
-
-</form>
-        </div>
   </div>
 
-  <script>
-    document.getElementById('weight').addEventListener('input', function() {
-      const price = parseFloat(document.getElementById('price').value) || 0;
-      const weight = parseFloat(this.value) || 0;
-      document.getElementById('total_amount').value = (price * weight).toFixed(0);
-    });
-  </script>
+  <!-- Services -->
+  <div class="service-container">
+    <div class="service-card" onclick="chooseService('baju', 8000)">
+      <i class="fa-solid fa-shirt"></i>
+      <h4>Baju</h4>
+      <p>Cuci, setrika, dan lipat rapi.</p>
+      <span class="price">Rp8.000 / Kg</span>
+    </div>
+    <div class="service-card" onclick="chooseService('celana', 9000)">
+      <i class="fa-solid fa-user"></i>
+      <h4>Celana</h4>
+      <p>Perawatan khusus untuk celana favoritmu.</p>
+      <span class="price">Rp9.000 / Kg</span>
+    </div>
+    <div class="service-card" onclick="chooseService('jaket', 12000)">
+      <i class="fa-solid fa-vest"></i>
+      <h4>Jaket</h4>
+      <p>Cuci bersih tanpa merusak bahan.</p>
+      <span class="price">Rp12.000 / Kg</span>
+    </div>
+    <div class="service-card" onclick="chooseService('selimut', 10000)">
+      <i class="fa-solid fa-bed"></i>
+      <h4>Selimut</h4>
+      <p>Segar, bersih, dan bebas tungau.</p>
+      <span class="price">Rp10.000 / Kg</span>
+    </div>
+    <div class="service-card" onclick="chooseService('sepatu', 15000)">
+      <i class="fa-solid fa-shoe-prints"></i>
+      <h4>Sepatu</h4>
+      <p>Cuci sepatu tanpa merusak warna dan bentuk.</p>
+      <span class="price">Rp15.000 / Pasang</span>
+    </div>
+    <div class="service-card" onclick="chooseService('karpet', 20000)">
+      <i class="fa-solid fa-rug"></i>
+      <h4>Karpet</h4>
+      <p>Cuci karpet dengan peralatan profesional.</p>
+      <span class="price">Rp20.000 / Kg</span>
+    </div>
+  </div>
+
+  <!-- Order Table -->
+  <div class="order-section">
+    <h2><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Order Anda</h2>
+
+    <?php if (mysqli_num_rows($order_query) > 0): ?>
+      <table>
+        <thead>
+          <tr>
+            <th>Kode Order</th>
+            <th>Service</th>
+            <th>Berat (Kg)</th>
+            <th>Total (Rp)</th>
+            <th>Status</th>
+            <th>Pembayaran</th>
+            <th>Tanggal Pesan</th>
+          </tr>
+        </thead>
+
+<tbody>
+<?php while ($row = mysqli_fetch_assoc($order_query)): ?>
+  <tr>
+
+    <td data-label="Kode"><?= $row['order_code']; ?></td>
+
+    <td data-label="Service" data-hide="mobile"><?= $row['service_type']; ?></td>
+
+    <td data-label="Berat (Kg)" data-hide="mobile">
+      <?= $row['weight']; ?> Kg
+    </td>
+
+    <td data-label="Total">
+      Rp<?= number_format($row['total_amount'], 0, ',', '.'); ?>
+    </td>
+
+    <td data-label="Status" data-hide="mobile">
+      <span class="status-badge <?= $row['status']; ?>">
+        <?= $row['status']; ?>
+      </span>
+    </td>
+
+    <td data-label="Pembayaran">
+      <?php if ($row['payment_status'] === 'unpaid'): ?>
+        <a href="../payment/pay.php?id=<?= $row['va_id']; ?>&order=<?= $row['id']; ?>"
+           class="status-badge unpaid clickable-badge"
+           style="text-decoration:none;">
+          unpaid
+        </a>
+      <?php else: ?>
+        <span class="status-badge paid">paid</span>
+      <?php endif; ?>
+    </td>
+    <td data-label="Kode"><?= $row['created_at']; ?></td>
+
+  </tr>
+<?php endwhile; ?>
+</tbody>
+
+
+
+      </table>
+
+    <?php else: ?>
+      <p style="color:#777;">Belum ada orderan yang dibuat.</p>
+    <?php endif; ?>
+
+  </div>
+
+</div>
+
+<script>
+function chooseService(service, price) {
+  Swal.fire({
+    title: 'Pilih Jenis Service',
+    html: `
+      <p>Kamu memilih <b>${service.toUpperCase()}</b> - Rp${price.toLocaleString()} / Kg</p>
+      <select id="serviceTypeSelect" class="swal2-select" style="margin-top:15px;">
+        <option value="">-- Pilih Jenis Service --</option>
+        <option value="kiloan">Kiloan</option>
+        <option value="satuan">Satuan</option>
+        <option value="dry_clean">Dry Clean</option>
+        <option value="express">Express</option>
+      </select>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Lanjutkan Order',
+    cancelButtonText: 'Batal',
+    confirmButtonColor: '#007bff',
+    preConfirm: () => {
+      const type = document.getElementById('serviceTypeSelect').value;
+      if (!type) {
+        Swal.showValidationMessage('Pilih jenis service dulu!');
+        return false;
+      }
+      return type;
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const type = result.value;
+      window.location.href = `insert.php?service=${service}&price=${price}&type=${type}`;
+    }
+  });
+}
+</script>
+
 </body>
 </html>

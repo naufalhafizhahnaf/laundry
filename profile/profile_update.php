@@ -33,7 +33,7 @@ if (!empty($password)) {
 if ($photoName !== null) {
     $sql .= ", photo='$photoName'";
 }
-
+    
 $sql .= " WHERE id='$id'";
 
 if (mysqli_query($connection, $sql)) {
