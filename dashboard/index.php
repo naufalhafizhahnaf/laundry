@@ -182,7 +182,7 @@ body {
 
   <div class="content-wrapper">
     <div class="content">
-      <h1>Selamat Datang di <br>Laundryin</h1>
+      <h1>Selamat Datang di <br>Laundry Care</h1>
       <p>Click Button Below to Start the Program</p>
     </div>
   </div>

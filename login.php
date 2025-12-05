@@ -110,7 +110,7 @@ button:hover {background:#0056b3;}
     <!-- LOGIN -->
     <div class="form-container login-container">
         <form method="POST">
-            <h2>LaundryIn</h2>
+            <h2>Laundry Care</h2>
             <p>Login to your account</p>
             <?php if ($message_login): ?>
                 <div class="popup-message"><span><?= htmlspecialchars($message_login) ?></span></div>

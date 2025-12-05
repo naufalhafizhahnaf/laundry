@@ -383,7 +383,7 @@ button:hover {
     <div class="profile-top">
         <a title="photo">
     <?php if (!empty($user['photo']) && $user['photo'] !== "default"): ?>
-        <img src="/uploads/profile/<?= $user['photo']; ?>" class="profile-foto">
+        <img src="../uploads/profile/<?= $user['photo']; ?>" class="profile-foto">
     <?php else: ?>
         <div class="photo-icon-default2">
             <i class="fa-solid fa-circle-user"></i>
